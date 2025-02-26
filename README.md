@@ -25,6 +25,12 @@ This project has got you covered! 💡
 ✅ **User-Friendly Web App** – Simple yet powerful UI with **one-click recommendations**.  
 
 ---
+Here!! are the images of the project ......
+
+![image](https://github.com/user-attachments/assets/81933a23-f2db-405a-885c-c77dd0b4ce9e)
+![image](https://github.com/user-attachments/assets/9a7e19f8-be71-42b5-b44e-8ffe42cc2b9d)
+
+
 
 ## 💻 Tech Stack  
 🔹 **Backend** – Python, Flask, NLTK (VADER Sentiment Analysis)  
