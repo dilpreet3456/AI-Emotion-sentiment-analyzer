@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Emotion Analyzer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #ffecd2, #fcb69f);
+            transition: background 0.5s ease;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #4a4e69;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #9a8c98;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        .emoji-rain {
+            position: absolute;
+            top: 0;
+            font-size: 2rem;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            from { transform: translateY(-10vh); opacity: 1; }
+            to { transform: translateY(100vh); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Emotion Analyzer</h1>
+        <p>How are you feeling today?</p>
+        <textarea id="userText" rows="4" placeholder="Enter your thoughts..."></textarea><br>
+        <button onclick="analyzeEmotion()">Analyze</button>
+        <p id="emotionResult"></p>
+        <p id="motivationQuote" class="hidden"></p>
+        <div id="options" class="hidden">
+            <p>What would you like?</p>
+            <button onclick="getRecommendation('music')">// Music</button>
+            <button onclick="getRecommendation('movies')">🎬 Movies</button>
+            <button onclick="getRecommendation('games')">🎮 Games</button>
+            <button onclick="getRecommendation('novels')">📖 Novels</button>
+            <button onclick="getRecommendation('vacations')">🌍 Vacation</button>
+        </div>
+        <p id="suggestion"></p>
+    </div>
+
+    <script>
+        function analyzeEmotion() {
+            let text = document.getElementById('userText').value;
+    
+    $.ajax({
+        url: "/analyze",
+        type: "POST",
+        contentType: "application/json",  // ✅ Fix: Specify JSON content type
+        data: JSON.stringify({ text: text }),
+        success: function(response) {
+            let emotion = response.emotion;
+            let emojis = response.emoji;
+            $('#emotionResult').html(`Emotion: ${emotion} ${emojis}`);
+            createEmojiRain(emojis);
+            $('#options').removeClass('hidden');
+            $('#motivationQuote').text(response.quote).removeClass('hidden');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+        }
+    });
+        }
+
+function getRecommendation(category) {
+    let emotionText = $('#emotionResult').text();
+    if (!emotionText.includes(":")) {
+        $('#suggestion').text("Please analyze your emotion first!");
+        return;
+    }
+
+    let emotion = emotionText.split(': ')[1].split(' ')[0].toLowerCase();
+
+    $.ajax({
+        url: "/recommend",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ emotion: emotion, category: category }),
+        success: function(response) {
+            let suggestion = response.suggestion;
+
+            // ✅ Fix: Ensure it's a clickable link
+            if (suggestion.startsWith("http")) {
+                $('#suggestion').html(`Recommended: <a href='${suggestion}' target='_blank'>Click Here</a>`);
+            } else {
+                $('#suggestion').text(suggestion);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", error);
+            $('#suggestion').text("Error fetching recommendation.");
+        }
+    });
+}
+
+        function createEmojiRain(emojis) {
+        for (let i = 0; i < 30; i++) {  // Increase emoji count
+            let emoji = document.createElement("div");
+            emoji.className = "emoji-rain";
+            emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            document.body.appendChild(emoji);
+            emoji.style.left = Math.random() * 100 + "vw";
+            emoji.style.animationDuration = (Math.random() * 5 + 5) + "s"; // 5s - 10s duration
+            
+            setTimeout(() => { emoji.remove(); }, 10000); // Remove after 10s
+        }
+    }
+    </script>
+</body>
+</html>
